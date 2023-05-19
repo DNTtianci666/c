@@ -456,17 +456,17 @@ static bool windowOpen = false;
 
 void inventory_changer::InventoryChanger::menuBarItem() noexcept
 {
-    if (ImGui::MenuItem("Inventory Changer")) {
+    if (ImGui::MenuItem("库存修改器")) {
         windowOpen = true;
-        ImGui::SetWindowFocus("Inventory Changer");
-        ImGui::SetWindowPos("Inventory Changer", { 100.0f, 100.0f });
+        ImGui::SetWindowFocus("库存修改器");
+        ImGui::SetWindowPos("库存修改器", { 100.0f, 100.0f });
     }
 }
 
 void inventory_changer::InventoryChanger::tabItem(const Memory& memory) noexcept
 {
-    if (ImGui::BeginTabItem("Inventory Changer")) {
-        drawGUI(memory, true);
+    if (ImGui::BeginTabItem("库存修改器")) {
+  drawGUI(memory, true);
         ImGui::EndTabItem();
     }
 }
@@ -592,7 +592,7 @@ namespace ImGui
             const auto cursorPosBackup = window->DC.CursorPos.y;
 
             window->DC.CursorPos.y += (size.y - GetFrameHeight()) * 0.5f;
-            pressed = Button("Add");
+            pressed = Button("添加");
 
             window->DC.CursorPosPrevLine.y = cursorPosBackup;
             window->DC.CursorPos.y = cursorPosNext;
@@ -691,7 +691,7 @@ namespace ImGui
         const auto cursorPosBackup = window->DC.CursorPos.y;
 
         window->DC.CursorPos.y += (size.y - GetFrameHeight()) * 0.5f;
-        if (Button("Delete"))
+        if (Button("删除"))
             shouldDelete = true;
 
         window->DC.CursorPosPrevLine.y = cursorPosBackup;
@@ -702,10 +702,10 @@ namespace ImGui
 namespace inventory_changer
 {
 
-[[nodiscard]] InventoryChangerReturnAddresses createInventoryChangerReturnAddresses(const ClientPatternFinder& clientPatternFinder)
+    [[nodiscard]] InventoryChangerReturnAddresses createInventoryChangerReturnAddresses(const ClientPatternFinder& clientPatternFinder)
 {
     return InventoryChangerReturnAddresses{
-        .setStickerToolSlotGetArgAsNumber = clientPatternFinder.setStickerToolSlotGetArgAsNumber(),
+.setStickerToolSlotGetArgAsNumber = clientPatternFinder.setStickerToolSlotGetArgAsNumber(),
         .wearItemStickerGetArgAsString = clientPatternFinder.wearItemStickerGetArgAsString(),
         .setNameToolStringGetArgAsString = clientPatternFinder.setNameToolStringGetArgAsString(),
         .clearCustomNameGetArgAsString = clientPatternFinder.clearCustomNameGetArgAsString(),
@@ -721,7 +721,7 @@ namespace inventory_changer
         .useToolGetArgAsString = clientPatternFinder.useToolGetArgAsString()
     };
 }
-
+    
 struct NameComparator {
     NameComparator(const game_items::Storage& gameItemStorage, const WeaponNames& weaponNames)
         : gameItemStorage{ gameItemStorage }, weaponNames{ weaponNames } {}
@@ -753,7 +753,7 @@ void InventoryChanger::drawGUI(const Memory& memory, bool contentOnly)
         if (!windowOpen)
             return;
         ImGui::SetNextWindowSize({ 700.0f, 400.0f });
-        if (!ImGui::Begin("Inventory Changer", &windowOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
+        if (!ImGui::Begin("库存修改器", &windowOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
             ImGui::End();
             return;
         }
@@ -763,12 +763,12 @@ void InventoryChanger::drawGUI(const Memory& memory, bool contentOnly)
 
     static bool isInAddMode = false;
 
-    if (!isInAddMode && ImGui::Button("Add items.."))
+    if (!isInAddMode && ImGui::Button("添加库存"))
         isInAddMode = true;
 
     if (!isInAddMode) {
         ImGui::SameLine();
-        if (ImGui::Button("Force Update"))
+        if (ImGui::Button("强制刷新"))
             scheduleHudUpdate();
     }
 
@@ -787,15 +787,15 @@ void InventoryChanger::drawGUI(const Memory& memory, bool contentOnly)
     };
 
     if (isInAddMode) {
-        if (ImGui::Button("Back")) {
+        if (ImGui::Button("返回")) {
             isInAddMode = false;
         }
 
         ImGui::SameLine();
         ImGui::SetNextItemWidth(550.0f);
-        const bool filterChanged = ImGui::InputTextWithHint("##search", "Search weapon skins, stickers, knives, gloves, music kits..", &filter);
+        const bool filterChanged = ImGui::InputTextWithHint("##search", "搜索皮肤，贴纸，刀，手套，音乐盒，勋章等..", &filter);
         ImGui::SameLine();
-        const bool addingAll = ImGui::Button("Add all in list");
+        const bool addingAll = ImGui::Button("添加库存");
 
         constexpr auto passesFilter = []<typename... Strings>(std::wstring_view filter, Strings&&... strings) {
             for (const auto filterWord : ranges::views::split(filter, L' ')) {
