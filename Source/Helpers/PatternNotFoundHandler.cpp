@@ -38,6 +38,6 @@ void PatternNotFoundHandler::operator()(BytePattern pattern) const
 {
     assert(false && "Pattern needs to be updated!");
 #if IS_WIN32()
-    MessageBoxA(nullptr, ("找不到模式:\n" + patternToString(pattern.get())).c_str(), "QS", MB_OK | MB_ICONWARNING);
+    MessageBoxA(nullptr, StringBuilderStorage<300>{}.builder().put("Failed to find pattern:\n", PatternToString{ pattern }).cstring(), "QS", MB_OK | MB_ICONWARNING);
 #endif
 }
