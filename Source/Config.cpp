@@ -80,7 +80,7 @@ int CALLBACK fontCallback(const LOGFONTW* lpelfe, const TEXTMETRICW*, DWORD, LPA
         path = homeDir;
 #endif
 
-    path /= "Osiris";
+    path /= "QS";
     return path;
 }
 
