@@ -925,9 +925,7 @@ void Misc::purchaseList(const csgo::GameEvent* event) noexcept
                     stringBuilder.put(purchasedItem.first);
                     printedFirst = true;
                 }
-
-                if (s.length() >= 2)
-                    s.erase(s.length() - 2);
+                
 
                 if (const auto player = GameData::playerByHandle(handle)) {
                     if (miscConfig.purchaseList.showPrices)
