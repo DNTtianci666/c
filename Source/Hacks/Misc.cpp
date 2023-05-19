@@ -173,11 +173,11 @@ Misc::Misc(const ClientInterfaces& clientInterfaces, const EngineInterfaces& eng
 #if IS_WIN32() || IS_WIN64()
     setClanTag{ retSpoofGadgets->engine, enginePatternFinder("53 56 57 8B DA 8B F9 FF 15"_pat).get() },
 #elif IS_LINUX()
-    setClanTag{ retSpoofGadgets->engine, enginePatternFinder("E8 ? ? ? ? E9 ? ? ? ? 0F 1F 44 00 00 48 8B 7D B0"_pat).add(1).abs().get() },
+   setClanTag{ retSpoofGadgets->engine, enginePatternFinder("E8 ? ? ? ? E9 ? ? ? ? 0F 1F 44 00 00 48 8B 7D B0"_pat).add(1).abs().get() },
 #endif
-    submitReport{ retSpoofGadgets->client, clientPatternFinder.submitReport() }
+submitReport{ retSpoofGadgets->client, clientPatternFinder.submitReport() }
 {
-    demoOrHLTV = clientPatternFinder.demoOrHLTV();
+ demoOrHLTV = clientPatternFinder.demoOrHLTV();
     money = clientPatternFinder.money();
     insertIntoTree = clientPatternFinder.insertIntoTree();
     demoFileEndReached = clientPatternFinder.demoFileEndReached();
@@ -316,7 +316,7 @@ void Misc::spectatorList() noexcept
         ImGui::PushStyleColor(ImGuiCol_TitleBg, ImGui::GetColorU32(ImGuiCol_TitleBgActive));
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, { 0.5f, 0.5f });
-    ImGui::Begin("Spectator list", nullptr, windowFlags);
+    ImGui::Begin("观战者名单", nullptr, windowFlags);
     ImGui::PopStyleVar();
 
     if (!gui->isOpen())
@@ -409,7 +409,7 @@ void Misc::watermark() noexcept
     static auto frameRate = 1.0f;
     frameRate = 0.9f * frameRate + 0.1f * memory.globalVars->absoluteFrameTime;
 
-    ImGui::Text("Osiris | %d fps | %d ms", frameRate != 0.0f ? static_cast<int>(1 / frameRate) : 0, GameData::getNetOutgoingLatency());
+    ImGui::Text("QS | %d fps | %d ms", frameRate != 0.0f ? static_cast<int>(1 / frameRate) : 0, GameData::getNetOutgoingLatency());
     ImGui::End();
 }
 
@@ -510,7 +510,7 @@ void Misc::drawBombTimer() noexcept
         ImGui::SetNextWindowSize({ windowWidth, 0 });
 
     ImGui::SetNextWindowSizeConstraints({ 0, -1 }, { FLT_MAX, -1 });
-    ImGui::Begin("Bomb Timer", nullptr, ImGuiWindowFlags_NoTitleBar | (gui->isOpen() ? 0 : ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoDecoration));
+    ImGui::Begin("炸弹计时器", nullptr, ImGuiWindowFlags_NoTitleBar | (gui->isOpen() ? 0 : ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoDecoration));
 
     std::ostringstream ss; ss << "Bomb on " << (!plantedC4.bombsite ? 'A' : 'B') << " : " << std::fixed << std::showpoint << std::setprecision(3) << (std::max)(plantedC4.blowTime - memory.globalVars->currenttime, 0.0f) << " s";
     ImGui::textUnformattedCentered(ss.str().c_str());
@@ -525,14 +525,14 @@ void Misc::drawBombTimer() noexcept
         if (plantedC4.defuserHandle == GameData::local().handle) {
             if (canDefuse) {
                 ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
-                ImGui::textUnformattedCentered("You can defuse!");
+                ImGui::textUnformattedCentered("可以拆包!");
             } else {
                 ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-                ImGui::textUnformattedCentered("You can not defuse!");
+                ImGui::textUnformattedCentered("不能拆包!");
             }
             ImGui::PopStyleColor();
         } else if (const auto defusingPlayer = GameData::playerByHandle(plantedC4.defuserHandle)) {
-            std::ostringstream ss; ss << defusingPlayer->name << " is defusing: " << std::fixed << std::showpoint << std::setprecision(3) << (std::max)(plantedC4.defuseCountDown - memory.globalVars->currenttime, 0.0f) << " s";
+            std::ostringstream ss; ss << defusingPlayer->name << " 正在拆包: " << std::fixed << std::showpoint << std::setprecision(3) << (std::max)(plantedC4.defuseCountDown - memory.globalVars->currenttime, 0.0f) << " s";
             ImGui::textUnformattedCentered(ss.str().c_str());
 
             ImGui::PushStyleColor(ImGuiCol_PlotHistogram, canDefuse ? IM_COL32(0, 255, 0, 255) : IM_COL32(255, 0, 0, 255));
@@ -905,7 +905,7 @@ void Misc::purchaseList(const csgo::GameEvent* event) noexcept
             windowFlags |= ImGuiWindowFlags_NoTitleBar;
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, { 0.5f, 0.5f });
-        ImGui::Begin("Purchases", nullptr, windowFlags);
+        ImGui::Begin("购买", nullptr, windowFlags);
         ImGui::PopStyleVar();
 
         if (miscConfig.purchaseList.mode == PurchaseList::Details) {
@@ -919,12 +919,15 @@ void Misc::purchaseList(const csgo::GameEvent* event) noexcept
                 for (const auto& purchasedItem : purchases.items) {
                     if (printedFirst)
                         stringBuilder.put(", ");
-
+                    
                     if (purchasedItem.second > 1)
                         stringBuilder.put(purchasedItem.second, "x ");
                     stringBuilder.put(purchasedItem.first);
                     printedFirst = true;
                 }
+
+                if (s.length() >= 2)
+                    s.erase(s.length() - 2);
 
                 if (const auto player = GameData::playerByHandle(handle)) {
                     if (miscConfig.purchaseList.showPrices)
@@ -939,7 +942,7 @@ void Misc::purchaseList(const csgo::GameEvent* event) noexcept
 
             if (miscConfig.purchaseList.showPrices && totalCost > 0) {
                 ImGui::Separator();
-                ImGui::TextWrapped("Total: $%d", totalCost);
+                ImGui::TextWrapped("总共: $%d", totalCost);
             }
         }
         ImGui::End();
@@ -977,6 +980,7 @@ static int reportbotRound;
 
 static void generateReportString(StringBuilder& builder)
 {
+    
     if (miscConfig.reportbot.textAbuse)
         builder.put("textabuse,");
     if (miscConfig.reportbot.griefing)
@@ -1028,8 +1032,7 @@ void Misc::runReportbot() noexcept
 
     if (reportbotRound >= miscConfig.reportbot.rounds)
         return;
-
-    StringBuilderStorage<100> stringBuilderStorage;
+StringBuilderStorage<100> stringBuilderStorage;
     for (const auto& xuid : getXuidsOfCandidatesToBeReported(engineInterfaces.getEngine(), clientInterfaces, interfaces, memory)) {
         if (isPlayerReported(xuid))
             continue;
@@ -1103,7 +1106,7 @@ void Misc::voteRevealer(const csgo::GameEvent& event) noexcept
     const auto isLocal = localPlayer && entity.getPOD() == localPlayer.get().getPOD();
     const char color = votedYes ? '\x06' : '\x07';
 
-    csgo::HudChat::from(retSpoofGadgets->client, memory.clientMode->hudChat).printf(0, " \x0C\u2022Osiris\u2022 %c%s\x01 voted %c%s\x01", isLocal ? '\x01' : color, isLocal ? "You" : entity.getPlayerName(interfaces, memory).c_str(), color, votedYes ? "Yes" : "No");
+    csgo::HudChat::from(retSpoofGadgets->client, memory.clientMode->hudChat).printf(0, " \x0C\u2022QS\u2022 %c%s\x01 voted %c%s\x01", isLocal ? '\x01' : color, isLocal ? "You" : entity.getPlayerName(interfaces, memory).c_str(), color, votedYes ? "Yes" : "No");
 }
 
 void Misc::onVoteStart(const void* data, int size) noexcept
@@ -1131,19 +1134,19 @@ void Misc::onVoteStart(const void* data, int size) noexcept
     const auto isLocal = localPlayer && entity.getPOD() == localPlayer.get().getPOD();
 
     const auto voteType = reader.readInt32(3);
-    csgo::HudChat::from(retSpoofGadgets->client, memory.clientMode->hudChat).printf(0, " \x0C\u2022Osiris\u2022 %c%s\x01 call vote (\x06%s\x01)", isLocal ? '\x01' : '\x06', isLocal ? "You" : entity.getPlayerName(interfaces, memory).c_str(), voteName(voteType));
+    csgo::HudChat::from(retSpoofGadgets->client, memory.clientMode->hudChat).printf(0, " \x0C\u2022QS\u2022 %c%s\x01 call vote (\x06%s\x01)", isLocal ? '\x01' : '\x06', isLocal ? "You" : entity.getPlayerName(interfaces, memory).c_str(), voteName(voteType));
 }
 
 void Misc::onVotePass() noexcept
 {
     if (miscConfig.revealVotes)
-        csgo::HudChat::from(retSpoofGadgets->client, memory.clientMode->hudChat).printf(0, " \x0C\u2022Osiris\u2022\x01 Vote\x06 PASSED");
+        csgo::HudChat::from(retSpoofGadgets->client, memory.clientMode->hudChat).printf(0, " \x0C\u2022QS\u2022\x01 Vote\x06 PASSED");
 }
 
 void Misc::onVoteFailed() noexcept
 {
     if (miscConfig.revealVotes)
-        csgo::HudChat::from(retSpoofGadgets->client, memory.clientMode->hudChat).printf(0, " \x0C\u2022Osiris\u2022\x01 Vote\x07 FAILED");
+        csgo::HudChat::from(retSpoofGadgets->client, memory.clientMode->hudChat).printf(0, " \x0C\u2022QS\u2022\x01 Vote\x07 FAILED");
 }
 
 // ImGui::ShadeVertsLinearColorGradientKeepAlpha() modified to do interpolation in HSV
@@ -1346,16 +1349,16 @@ static bool windowOpen = false;
 
 void Misc::menuBarItem() noexcept
 {
-    if (ImGui::MenuItem("Misc")) {
+    if (ImGui::MenuItem("杂项")) {
         windowOpen = true;
-        ImGui::SetWindowFocus("Misc");
-        ImGui::SetWindowPos("Misc", { 100.0f, 100.0f });
+        ImGui::SetWindowFocus("杂项");
+        ImGui::SetWindowPos("杂项", { 100.0f, 100.0f });
     }
 }
 
 void Misc::tabItem(Visuals& visuals, inventory_changer::InventoryChanger& inventoryChanger, Glow& glow) noexcept
 {
-    if (ImGui::BeginTabItem("Misc")) {
+    if (ImGui::BeginTabItem("杂项")) {
         drawGUI(visuals, inventoryChanger, glow, true);
         ImGui::EndTabItem();
     }
@@ -1367,39 +1370,39 @@ void Misc::drawGUI(Visuals& visuals, inventory_changer::InventoryChanger& invent
         if (!windowOpen)
             return;
         ImGui::SetNextWindowSize({ 580.0f, 0.0f });
-        ImGui::Begin("Misc", &windowOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
+        ImGui::Begin("杂项", &windowOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
             | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
     }
     ImGui::Columns(2, nullptr, false);
     ImGui::SetColumnOffset(1, 230.0f);
-    ImGui::hotkey("Menu Key", miscConfig.menuKey);
-    ImGui::Checkbox("Anti AFK kick", &miscConfig.antiAfkKick);
-    ImGui::Checkbox("Auto strafe", &miscConfig.autoStrafe);
-    ImGui::Checkbox("Bunny hop", &miscConfig.bunnyHop);
-    ImGui::Checkbox("Fast duck", &miscConfig.fastDuck);
-    ImGui::Checkbox("Moonwalk", &miscConfig.moonwalk);
-    ImGui::Checkbox("Edge Jump", &miscConfig.edgejump);
+    ImGui::hotkey("呼出菜单", miscConfig.menuKey);
+    ImGui::Checkbox("挂机防踢", &miscConfig.antiAfkKick);
+    ImGui::Checkbox("自动转向", &miscConfig.autoStrafe);
+    ImGui::Checkbox("连跳", &miscConfig.bunnyHop);
+    ImGui::Checkbox("快速蹲起", &miscConfig.fastDuck);
+    ImGui::Checkbox("滑步", &miscConfig.moonwalk);
+    ImGui::Checkbox("边缘跳", &miscConfig.edgejump);
     ImGui::SameLine();
     ImGui::PushID("Edge Jump Key");
     ImGui::hotkey("", miscConfig.edgejumpkey);
     ImGui::PopID();
-    ImGui::Checkbox("Slowwalk", &miscConfig.slowwalk);
+    ImGui::Checkbox("慢走", &miscConfig.slowwalk);
     ImGui::SameLine();
     ImGui::PushID("Slowwalk Key");
     ImGui::hotkey("", miscConfig.slowwalkKey);
     ImGui::PopID();
-    ImGuiCustom::colorPicker("Noscope crosshair", miscConfig.noscopeCrosshair);
-    ImGuiCustom::colorPicker("Recoil crosshair", miscConfig.recoilCrosshair);
-    ImGui::Checkbox("Auto pistol", &miscConfig.autoPistol);
-    ImGui::Checkbox("Auto reload", &miscConfig.autoReload);
-    ImGui::Checkbox("Auto accept", &miscConfig.autoAccept);
-    ImGui::Checkbox("Radar hack", &miscConfig.radarHack);
-    ImGui::Checkbox("Reveal ranks", &miscConfig.revealRanks);
-    ImGui::Checkbox("Reveal money", &miscConfig.revealMoney);
-    ImGui::Checkbox("Reveal suspect", &miscConfig.revealSuspect);
-    ImGui::Checkbox("Reveal votes", &miscConfig.revealVotes);
+    ImGuiCustom::colorPicker("盲狙十字准星", miscConfig.noscopeCrosshair);
+    ImGuiCustom::colorPicker("压强十字准星", miscConfig.recoilCrosshair);
+    ImGui::Checkbox("手枪连发", &miscConfig.autoPistol);
+    ImGui::Checkbox("自动换弹", &miscConfig.autoReload);
+    ImGui::Checkbox("自动接收", &miscConfig.autoAccept);
+    ImGui::Checkbox("雷达显示", &miscConfig.radarHack);
+    ImGui::Checkbox("显示段位", &miscConfig.revealRanks);
+    ImGui::Checkbox("显示金钱", &miscConfig.revealMoney);
+    ImGui::Checkbox("显示嫌疑人", &miscConfig.revealSuspect);
+    ImGui::Checkbox("公布投票", &miscConfig.revealVotes);
 
-    ImGui::Checkbox("Spectator list", &miscConfig.spectatorList.enabled);
+    ImGui::Checkbox("观战者名单", &miscConfig.spectatorList.enabled);
     ImGui::SameLine();
 
     ImGui::PushID("Spectator list");
@@ -1407,23 +1410,23 @@ void Misc::drawGUI(Visuals& visuals, inventory_changer::InventoryChanger& invent
         ImGui::OpenPopup("");
 
     if (ImGui::BeginPopup("")) {
-        ImGui::Checkbox("No Title Bar", &miscConfig.spectatorList.noTitleBar);
+        ImGui::Checkbox("去除边框", &miscConfig.spectatorList.noTitleBar);
         ImGui::EndPopup();
     }
     ImGui::PopID();
 
-    ImGui::Checkbox("Watermark", &miscConfig.watermark.enabled);
-    ImGuiCustom::colorPicker("Offscreen Enemies", miscConfig.offscreenEnemies.asColor4(), &miscConfig.offscreenEnemies.enabled);
+    ImGui::Checkbox("显示水印", &miscConfig.watermark.enabled);
+    ImGuiCustom::colorPicker("屏幕外的敌人", miscConfig.offscreenEnemies.asColor4(), &miscConfig.offscreenEnemies.enabled);
     ImGui::SameLine();
     ImGui::PushID("Offscreen Enemies");
     if (ImGui::Button("..."))
         ImGui::OpenPopup("");
 
     if (ImGui::BeginPopup("")) {
-        ImGui::Checkbox("Health Bar", &miscConfig.offscreenEnemies.healthBar.enabled);
+        ImGui::Checkbox("显示血量", &miscConfig.offscreenEnemies.healthBar.enabled);
         ImGui::SameLine();
         ImGui::SetNextItemWidth(95.0f);
-        ImGui::Combo("Type", &miscConfig.offscreenEnemies.healthBar.type, "Gradient\0Solid\0Health-based\0");
+        ImGui::Combo("类型", &miscConfig.offscreenEnemies.healthBar.type, "渐变\0立体\0基于血量\0");
         if (miscConfig.offscreenEnemies.healthBar.type == HealthBar::Solid) {
             ImGui::SameLine();
             ImGuiCustom::colorPicker("", miscConfig.offscreenEnemies.healthBar.asColor4());
@@ -1431,15 +1434,15 @@ void Misc::drawGUI(Visuals& visuals, inventory_changer::InventoryChanger& invent
         ImGui::EndPopup();
     }
     ImGui::PopID();
-    ImGui::Checkbox("Fix animation LOD", &miscConfig.fixAnimationLOD);
-    ImGui::Checkbox("Fix movement", &miscConfig.fixMovement);
-    ImGui::Checkbox("Disable model occlusion", &miscConfig.disableModelOcclusion);
-    ImGui::SliderFloat("Aspect Ratio", &miscConfig.aspectratio, 0.0f, 5.0f, "%.2f");
+    ImGui::Checkbox("修复动画详细等级", &miscConfig.fixAnimationLOD);
+    ImGui::Checkbox("修复骨骼矩阵", &miscConfig.fixMovement);
+    ImGui::Checkbox("禁用模型模型遮挡", &miscConfig.disableModelOcclusion);
+    ImGui::SliderFloat("长宽比", &miscConfig.aspectratio, 0.0f, 5.0f, "%.2f");
     ImGui::NextColumn();
-    ImGui::Checkbox("Disable HUD blur", &miscConfig.disablePanoramablur);
-    ImGui::Checkbox("Animated clan tag", &miscConfig.animatedClanTag);
-    ImGui::Checkbox("Clock tag", &miscConfig.clocktag);
-    ImGui::Checkbox("Custom clantag", &miscConfig.customClanTag);
+    ImGui::Checkbox("隐藏HUD", &miscConfig.disablePanoramablur);
+    ImGui::Checkbox("动画氏族标记", &miscConfig.animatedClanTag);
+    ImGui::Checkbox("显示时间", &miscConfig.clocktag);
+    ImGui::Checkbox("自定义组名", &miscConfig.customClanTag);
     ImGui::SameLine();
     ImGui::PushItemWidth(120.0f);
     ImGui::PushID(0);
@@ -1447,53 +1450,53 @@ void Misc::drawGUI(Visuals& visuals, inventory_changer::InventoryChanger& invent
     if (ImGui::InputText("", miscConfig.clanTag, sizeof(miscConfig.clanTag)))
         updateClanTag(true);
     ImGui::PopID();
-    ImGui::Checkbox("Kill message", &miscConfig.killMessage);
+    ImGui::Checkbox("击杀信息", &miscConfig.killMessage);
     ImGui::SameLine();
     ImGui::PushItemWidth(120.0f);
     ImGui::PushID(1);
     ImGui::InputText("", &miscConfig.killMessageString);
     ImGui::PopID();
-    ImGui::Checkbox("Name stealer", &miscConfig.nameStealer);
+    ImGui::Checkbox("窃取名称", &miscConfig.nameStealer);
     ImGui::PushID(3);
     ImGui::SetNextItemWidth(100.0f);
-    ImGui::Combo("", &miscConfig.banColor, "White\0Red\0Purple\0Green\0Light green\0Turquoise\0Light red\0Gray\0Yellow\0Gray 2\0Light blue\0Gray/Purple\0Blue\0Pink\0Dark orange\0Orange\0");
+    ImGui::Combo("", &miscConfig.banColor, "白\0红\0粉\0绿\0亮绿\0绿宝石\0亮红\0灰\0黄\0灰2\0亮蓝\0灰/紫\0蓝\0粉\0暗橙\0橙\0");
     ImGui::PopID();
     ImGui::SameLine();
     ImGui::PushID(4);
     ImGui::InputText("", &miscConfig.banText);
     ImGui::PopID();
     ImGui::SameLine();
-    if (ImGui::Button("Setup fake ban"))
+    if (ImGui::Button("设置假封禁"))
         fakeBan(true);
-    ImGui::Checkbox("Fast plant", &miscConfig.fastPlant);
-    ImGui::Checkbox("Fast Stop", &miscConfig.fastStop);
-    ImGuiCustom::colorPicker("Bomb timer", miscConfig.bombTimer);
-    ImGui::Checkbox("Quick reload", &miscConfig.quickReload);
-    ImGui::Checkbox("Prepare revolver", &miscConfig.prepareRevolver);
+    ImGui::Checkbox("快速安放炸弹", &miscConfig.fastPlant);
+    ImGui::Checkbox("快速急停", &miscConfig.fastStop);
+    ImGuiCustom::colorPicker("C4倒计时", miscConfig.bombTimer);
+    ImGui::Checkbox("快速换弹", &miscConfig.quickReload);
+    ImGui::Checkbox("自动捏左轮", &miscConfig.prepareRevolver);
     ImGui::SameLine();
     ImGui::PushID("Prepare revolver Key");
     ImGui::hotkey("", miscConfig.prepareRevolverKey);
     ImGui::PopID();
-    ImGui::Combo("Hit Sound", &miscConfig.hitSound, "None\0Metal\0Gamesense\0Bell\0Glass\0Custom\0");
+    ImGui::Combo("击中音效", &miscConfig.hitSound, "无\0金属\0游戏感\0钟\0玻璃\0自定义\0");
     if (miscConfig.hitSound == 5) {
-        ImGui::InputText("Hit Sound filename", &miscConfig.customHitSound);
+        ImGui::InputText("击中音效文件名", &miscConfig.customHitSound);
         if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("audio file must be put in csgo/sound/ directory");
+            ImGui::SetTooltip("音频文件必须放在csgo/sound/目录中");
     }
     ImGui::PushID(5);
-    ImGui::Combo("Kill Sound", &miscConfig.killSound, "None\0Metal\0Gamesense\0Bell\0Glass\0Custom\0");
+    ImGui::Combo("击杀音效", &miscConfig.killSound, "无\0金属\0游戏感\0钟\0玻璃\0自定义\0");
     if (miscConfig.killSound == 5) {
-        ImGui::InputText("Kill Sound filename", &miscConfig.customKillSound);
+        ImGui::InputText("击杀音效文件名", &miscConfig.customKillSound);
         if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("audio file must be put in csgo/sound/ directory");
+            ImGui::SetTooltip("音频文件必须放在csgo/sound/目录中");
     }
     ImGui::PopID();
-    ImGui::Checkbox("Grenade Prediction", &miscConfig.nadePredict);
-    ImGui::Checkbox("Fix tablet signal", &miscConfig.fixTabletSignal);
+    ImGui::Checkbox("投掷物抛物线", &miscConfig.nadePredict);
+    ImGui::Checkbox("特训助手预测", &miscConfig.fixTabletSignal);
     ImGui::SetNextItemWidth(120.0f);
-    ImGui::SliderFloat("Max angle delta", &miscConfig.maxAngleDelta, 0.0f, 255.0f, "%.2f");
-    ImGui::Checkbox("Opposite Hand Knife", &miscConfig.oppositeHandKnife);
-    ImGui::Checkbox("Preserve Killfeed", &miscConfig.preserveKillfeed.enabled);
+    ImGui::SliderFloat("最大视角变化", &miscConfig.maxAngleDelta, 0.0f, 255.0f, "%.2f");
+    ImGui::Checkbox("刀枪反手", &miscConfig.oppositeHandKnife);
+    ImGui::Checkbox("保留击杀", &miscConfig.preserveKillfeed.enabled);
     ImGui::SameLine();
 
     ImGui::PushID("Preserve Killfeed");
@@ -1501,12 +1504,12 @@ void Misc::drawGUI(Visuals& visuals, inventory_changer::InventoryChanger& invent
         ImGui::OpenPopup("");
 
     if (ImGui::BeginPopup("")) {
-        ImGui::Checkbox("Only Headshots", &miscConfig.preserveKillfeed.onlyHeadshots);
+        ImGui::Checkbox("仅保留爆头", &miscConfig.preserveKillfeed.onlyHeadshots);
         ImGui::EndPopup();
     }
     ImGui::PopID();
 
-    ImGui::Checkbox("Purchase List", &miscConfig.purchaseList.enabled);
+    ImGui::Checkbox("购买记录", &miscConfig.purchaseList.enabled);
     ImGui::SameLine();
 
     ImGui::PushID("Purchase List");
@@ -1515,15 +1518,15 @@ void Misc::drawGUI(Visuals& visuals, inventory_changer::InventoryChanger& invent
 
     if (ImGui::BeginPopup("")) {
         ImGui::SetNextItemWidth(75.0f);
-        ImGui::Combo("Mode", &miscConfig.purchaseList.mode, "Details\0Summary\0");
-        ImGui::Checkbox("Only During Freeze Time", &miscConfig.purchaseList.onlyDuringFreezeTime);
-        ImGui::Checkbox("Show Prices", &miscConfig.purchaseList.showPrices);
-        ImGui::Checkbox("No Title Bar", &miscConfig.purchaseList.noTitleBar);
+        ImGui::Combo("模式", &miscConfig.purchaseList.mode, "详细\0总共\0");
+        ImGui::Checkbox("仅在冻结期间", &miscConfig.purchaseList.onlyDuringFreezeTime);
+        ImGui::Checkbox("显示价格", &miscConfig.purchaseList.showPrices);
+        ImGui::Checkbox("隐藏标题栏", &miscConfig.purchaseList.noTitleBar);
         ImGui::EndPopup();
     }
     ImGui::PopID();
 
-    ImGui::Checkbox("Reportbot", &miscConfig.reportbot.enabled);
+    ImGui::Checkbox("自动举报", &miscConfig.reportbot.enabled);
     ImGui::SameLine();
     ImGui::PushID("Reportbot");
 
@@ -1532,24 +1535,24 @@ void Misc::drawGUI(Visuals& visuals, inventory_changer::InventoryChanger& invent
 
     if (ImGui::BeginPopup("")) {
         ImGui::PushItemWidth(80.0f);
-        ImGui::Combo("Target", &miscConfig.reportbot.target, "Enemies\0Allies\0All\0");
-        ImGui::InputInt("Delay (s)", &miscConfig.reportbot.delay);
+        ImGui::Combo("目标", &miscConfig.reportbot.target, "敌人\0队友\0全部\0");
+        ImGui::InputInt("延迟 (秒)", &miscConfig.reportbot.delay);
         miscConfig.reportbot.delay = (std::max)(miscConfig.reportbot.delay, 1);
-        ImGui::InputInt("Rounds", &miscConfig.reportbot.rounds);
+        ImGui::InputInt("回合", &miscConfig.reportbot.rounds);
         miscConfig.reportbot.rounds = (std::max)(miscConfig.reportbot.rounds, 1);
         ImGui::PopItemWidth();
-        ImGui::Checkbox("Abusive Communications", &miscConfig.reportbot.textAbuse);
-        ImGui::Checkbox("Griefing", &miscConfig.reportbot.griefing);
-        ImGui::Checkbox("Wall Hacking", &miscConfig.reportbot.wallhack);
-        ImGui::Checkbox("Aim Hacking", &miscConfig.reportbot.aimbot);
-        ImGui::Checkbox("Other Hacking", &miscConfig.reportbot.other);
-        if (ImGui::Button("Reset"))
+        ImGui::Checkbox("语言辱骂", &miscConfig.reportbot.textAbuse);
+        ImGui::Checkbox("恶意骚扰", &miscConfig.reportbot.griefing);
+        ImGui::Checkbox("透视作弊", &miscConfig.reportbot.wallhack);
+        ImGui::Checkbox("自瞄作弊", &miscConfig.reportbot.aimbot);
+        ImGui::Checkbox("其他作弊", &miscConfig.reportbot.other);
+        if (ImGui::Button("刷新"))
             Misc::resetReportbot();
         ImGui::EndPopup();
     }
     ImGui::PopID();
 
-    if (ImGui::Button("Unhook"))
+    if (ImGui::Button("卸载辅助"))
         hooks->uninstall(*this, glow, memory, visuals, inventoryChanger);
 
     ImGui::Columns(1);
